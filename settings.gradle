@@ -1,0 +1,2 @@
+include ':app', ':heatbeat.numcpp'
+rootProject.name='HeatBeat'
