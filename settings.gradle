@@ -1,2 +1,10 @@
-include ':app', ':heatbeat.numcpp'
+
 rootProject.name='HeatBeat'
+
+def opencvsdk='opencv'
+//def opencvsdk='/<path to OpenCV-android-sdk>'
+//println opencvsdk
+include ':opencv'
+project(':opencv').projectDir = new File(opencvsdk + "/sdk")
+
+include ':app'

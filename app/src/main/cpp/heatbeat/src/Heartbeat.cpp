@@ -115,6 +115,7 @@ int main(int argc, char * argv[]) {
     Heartbeat cmd_line(argc, argv, true);
 
     string input = cmd_line.get_arg("-i"); // Filepath for offline mode
+    std::cout << "input = " + input << std::endl;
 
     // algorithm setting
     rPPGAlgorithm rPPGAlg;
@@ -215,14 +216,23 @@ int main(int argc, char * argv[]) {
 
     bool offlineMode = input != "";
 
+    std::cout << "start open data"<< std::endl;
     VideoCapture cap;
-    if (offlineMode) cap.open(input);
-    else cap.open(0);
+    if (offlineMode) {
+        //cap.open(input);
+        cap = VideoCapture(input);
+        std::cout << "offlineMode cap.open(" + input + ")"<< std::endl;
+    } else {
+        //cap.open(0);
+        cap.open(1);
+        std::cout << "onlineMode cap.open(0)"<< std::endl;
+    }
     if (!cap.isOpened()) {
+        std::cout << "cap.open failed, exit!" << std::endl;
         return -1;
     }
 
-	VideoCapture videoReader("outdoor_90bpm.avi");
+	//VideoCapture videoReader("outdoor_90bpm.avi");
 
     std::string title = offlineMode ? "rPPG offline" : "rPPG online";
     cout << title << endl;
@@ -282,11 +292,14 @@ int main(int argc, char * argv[]) {
 
 		int start = (cv::getTickCount() * 1000.0) / cv::getTickFrequency(); // 记录一帧开始时间，用于测试运行时间
 
-        // 从摄像头读取视频
-        cap.read(frameRGB);
-
-		// 从视频中读取视频
-		//videoReader >> frameRGB;
+        if (offlineMode) {
+            // 从视频中读取视频
+            //videoReader >> frameRGB;
+            cap >> frameRGB;
+        } else {
+            // 从摄像头读取视频
+            cap.read(frameRGB);
+        }
 
 		if (frameRGB.empty())
             break;
@@ -304,8 +317,12 @@ int main(int argc, char * argv[]) {
         int time;
 		// 如果读取视频文件进行测试，建议打开下行注释
 		// offlineMode = true;
-		if (offlineMode) time = videoReader.get(cv::CAP_PROP_POS_MSEC);
-        else time = (cv::getTickCount()*1000.0)/cv::getTickFrequency();
+		if (offlineMode) {
+		    //time = videoReader.get(cv::CAP_PROP_POS_MSEC);
+            time = cap.get(cv::CAP_PROP_POS_MSEC);
+		} else {
+		    time = (cv::getTickCount()*1000.0)/cv::getTickFrequency();
+		}
 
 		// 主要处理部分
         if (i % downsample == 0) {
@@ -326,6 +343,7 @@ int main(int argc, char * argv[]) {
 		my_fps << "time: " << after_time;
 		putText(frameRGB, my_fps.str(), Point(1, 30), cv::FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255,255,255), 2);
 
+        oVideoWriter << frameRGB;
         /*if (gui) {
             imshow(window_title.str(), frameRGB);
 			oVideoWriter << frameRGB;
@@ -336,7 +354,10 @@ int main(int argc, char * argv[]) {
         i++;
     }
 	oVideoWriter.release();
-	videoReader.release();
+    if (offlineMode) {
+        //videoReader.release();
+        cap.release();
+    }
 
     return 0;
 }
