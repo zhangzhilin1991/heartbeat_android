@@ -12,10 +12,9 @@
 //#include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 //#include "opencv.hpp"
-/*#include "Baseline.hpp"
+//#include "Baseline.hpp"
 #include <time.h>
-
-#include "src/RPPG.cpp"
+//#include "RPPG.cpp"
 
 #define DEFAULT_RPPG_ALGORITHM "g"
 #define DEFAULT_FACEDET_ALGORITHM "haar"
@@ -28,20 +27,21 @@
 #define HAAR_CLASSIFIER_PATH "algomodel/haar/haarcascade_frontalface_alt.xml"
 #define DNN_PROTO_PATH "algomodel/dnn/deploy.prototxt"
 #define DNN_MODEL_PATH "algomodel/dnn/res10_300x300_ssd_iter_140000.caffemodel"
- */
 
 using namespace cv;
 using namespace std;
 
 #include <android/log.h>
-#include <opencv2/features2d.hpp>
+#include <RPPG.hpp>
+//#include <opencv2/features2d.hpp>
 
 #define LOG_TAG "FaceDetection/DetectionBasedTracker"
 #define LOGD(...) ((void)__android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__))
 
-/*static Ptr<RPPG> rppg = nullptr;
-static Ptr<rPPGAlgorithm> rPPGAlg = nullptr;
-static Ptr<faceDetAlgorithm> faceDetAlg = nullptr;
+RPPG rppg;
+rPPGAlgorithm rPPGAlg;
+faceDetAlgorithm faceDetAlg;
+bool isInit = false;
 
 rPPGAlgorithm to_rppgAlgorithm(string s) {
     rPPGAlgorithm result;
@@ -60,7 +60,7 @@ rPPGAlgorithm to_rppgAlgorithm(string s) {
     return result;
 }
 
-faceDetAlgorithm to_faceDetAlgorithm(string s) {
+faceDetAlgorithm  to_faceDetAlgorithm(string s) {
     faceDetAlgorithm result;
     if (s == "haar")
     {
@@ -77,12 +77,13 @@ faceDetAlgorithm to_faceDetAlgorithm(string s) {
     return result;
 }
 
-void initRPPG(int width, int height) {
-    if (rppg == nullptr) {
+bool initRPPG(int width, int height) {
+    if (isInit == false) {
         rPPGAlg = to_rppgAlgorithm(DEFAULT_RPPG_ALGORITHM);
         faceDetAlg =  to_faceDetAlgorithm(DEFAULT_FACEDET_ALGORITHM);
         double rescanFrequency = DEFAULT_RESCAN_FREQUENCY;
         double samplingFrequency = DEFAULT_SAMPLING_FREQUENCY;
+        int  minSignalSize = DEFAULT_MIN_SIGNAL_SIZE;
         int maxSignalSize = DEFAULT_MAX_SIGNAL_SIZE;
         int downsample = DEFAULT_DOWNSAMPLE;
         string LOG_PATH = "sdcard/heartbeat/Live_ffmpeg";
@@ -93,8 +94,9 @@ void initRPPG(int width, int height) {
         //const double FPS = cap.get(cv::CAP_PROP_FPS);
         const double TIME_BASE = 0.001;
 
-        rppg = cv::Ptr<RPPG>(new RPPG());
-        rPPGAlg = rppg.load(rPPGAlg, faceDetAlg,
+        //rppg = cv::Ptr<RPPG>(new RPPG());
+        rppg = RPPG();
+        return rppg.load(rPPGAlg, faceDetAlg,
                           WIDTH, HEIGHT, TIME_BASE, downsample,
                           samplingFrequency, rescanFrequency,
                           minSignalSize, maxSignalSize,
@@ -102,6 +104,7 @@ void initRPPG(int width, int height) {
                           DNN_PROTO_PATH, DNN_MODEL_PATH,
                           false, false, 250);
     }
+    return false;
 }
 
 /**
@@ -109,12 +112,10 @@ void initRPPG(int width, int height) {
  * @param imageRgba
  * @param imageGray
  */
-/*
-void process(const Mat& imageRgba, const Mat& imageGray) { //ref
-    //if (rppg == nullptr) {
-    //    initRPPG();
-    //}
-
+void process(Mat& imageRgba, Mat& imageGray) { //ref
+    if (isInit == false) {
+        isInit = initRPPG(imageRgba.cols, imageRgba.rows);
+    }
     // 计算当前是第几帧
     rppg.countFrame();
 
@@ -137,7 +138,7 @@ void process(const Mat& imageRgba, const Mat& imageGray) { //ref
 
     // 主要处理部分
     //if (i % downsample == 0) {
-        rppg.processFrame(frameRGB, frameGray, time, rppg.face_detector);
+        rppg.processFrame(imageRgba, imageGray, time, rppg.face_detector);
     //} else {
      //   cout << "SKIPPING FRAME TO DOWNSAMPLE!" << endl;
     //}
@@ -146,9 +147,8 @@ void process(const Mat& imageRgba, const Mat& imageGray) { //ref
     //    baseline.processFrame(frameRGB, time);
     //}
 
-    int after_time = (cv::getTickCount() * 1000.0) / cv::getTickFrequency() - start;
+    //int after_time = (cv::getTickCount() * 1000.0) / cv::getTickFrequency() - start;
 }
-*/
 
 /*
 * Class:     com_nyiit_heatbeatdetection_detector_HeartBeatDetector
@@ -178,8 +178,8 @@ JNIEXPORT void JNICALL Java_com_nyiit_heatbeatdetection_detector_HeartBeatDetect
     str << rgbHeight;
     putText(mRgb, str.str(), Point(30, 30), cv::FONT_HERSHEY_SIMPLEX, 1, Scalar(255, 0, 0, 255), 2);
 
-        //initRPPG(width, height); //
-        //process(mRgb, mGr);
+        //initRPPG(width, height); /
+        process(mRgb, mGr);
     //} (
     //
 

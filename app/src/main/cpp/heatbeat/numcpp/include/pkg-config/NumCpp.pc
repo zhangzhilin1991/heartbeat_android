@@ -1,0 +1,12 @@
+# Package Information for pkg-config
+
+prefix= numcpp
+#exec_prefix=${prefix}
+#libdir=${exec_prefix}/lib
+#includedir_old=${prefix}/include/opencv
+includedir=${prefix}/include
+
+Name: NumCpp
+Description:NumCpp Library
+Version: 1.2.0
+Cflags: -I${includedir}
