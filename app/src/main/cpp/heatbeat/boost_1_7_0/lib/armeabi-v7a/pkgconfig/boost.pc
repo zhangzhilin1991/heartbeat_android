@@ -1,13 +1,12 @@
 # Package Information for pkg-config
 
-prefix=/home/nyiit/heatbeatproject/numcpp/NumCpp/boost/boost_1_70_0/mybuild/linux-build/install/
+prefix= boost_1_7_0
 exec_prefix=${prefix}
 libdir=${prefix}/lib
-#includedir_old=${prefix}/include/opencv
 includedir=${prefix}/include
 
 Name: boost
 Description:boost Library
 Version: 1.7.0
-Libs: -L${exec_prefix}/lib -lboost_system -lboost_filesystem
+Libs: -L${libdir} -lboost_system -lboost_filesystem
 Cflags: -I${includedir}

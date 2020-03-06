@@ -66,23 +66,26 @@ bool RPPG::load(const rPPGAlgorithm rPPGAlg, const faceDetAlgorithm faceDetAlg,
     }
 
     // Setting up logfilepath
-    ostringstream path_1;
-    path_1 << logPath << "_rppg=" << rPPGAlg << "_facedet=" << faceDetAlg << "_min=" << minSignalSize << "_max=" << maxSignalSize << "_ds=" << downsample;
-    this->logfilepath = path_1.str();
+    if (logMode) {
+		ostringstream path_1;
+		path_1 << logPath << "_rppg=" << rPPGAlg << "_facedet=" << faceDetAlg << "_min="
+			   << minSignalSize << "_max=" << maxSignalSize << "_ds=" << downsample;
+		this->logfilepath = path_1.str();
 
-    // Logging bpm according to sampling frequency
-    std::ostringstream path_2;
-    path_2 << logfilepath << "_meanbpm.csv";
-    logfile.open(path_2.str());
-	logfile << "frame,time,mean,\n";
-    logfile.flush();
+		// Logging bpm according to sampling frequency
+		std::ostringstream path_2;
+		path_2 << logfilepath << "_meanbpm.csv";
+		logfile.open(path_2.str());
+		logfile << "frame,time,mean,\n";
+		logfile.flush();
 
-    // Logging bpm detailed
-    std::ostringstream path_3;
-    path_3 << logfilepath << "_bpmAll.csv";
-    logfileDetailed.open(path_3.str());
-	logfileDetailed << "frame,time,bpm,fps,\n";
-    logfileDetailed.flush();
+		// Logging bpm detailed
+		std::ostringstream path_3;
+		path_3 << logfilepath << "_bpmAll.csv";
+		logfileDetailed.open(path_3.str());
+		logfileDetailed << "frame,time,bpm,fps,\n";
+		logfileDetailed.flush();
+	}
 
     return true;
 }

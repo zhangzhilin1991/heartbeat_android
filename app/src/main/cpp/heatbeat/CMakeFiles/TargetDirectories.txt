@@ -1,0 +1,2 @@
+/home/nyiit/AndroidStudioProjects/HeatBeat/app/src/main/cpp/heatbeat/CMakeFiles/rebuild_cache.dir
+/home/nyiit/AndroidStudioProjects/HeatBeat/app/src/main/cpp/heatbeat/CMakeFiles/edit_cache.dir

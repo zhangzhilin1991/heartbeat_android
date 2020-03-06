@@ -124,7 +124,7 @@ public class CameraPreviewActivity extends CameraActivity implements CameraBridg
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
 
         mRgba = inputFrame.rgba();
-        /*if (mRgbaT != null) {
+        if (mRgbaT != null) {
             mRgbaT.release();
         }
         mRgbaT = mRgba.t();
@@ -138,15 +138,14 @@ public class CameraPreviewActivity extends CameraActivity implements CameraBridg
         mGrayT = mGray.t();
         Core.flip(mGrayT, mGrayT, 1);
         Imgproc.resize(mGrayT, mGrayT, mGray.size());
-        */
 
 
-        //HeartBeatDetector.detectHeartBeat(mRgbaT, mGrayT);
+        HeartBeatDetector.detectHeartBeat(mRgbaT, mGrayT);
 
         int fps = fps();
-        Imgproc.putText(mRgba, "fps: " + fps, new Point(30,60),FONT_HERSHEY_SIMPLEX, 1, new Scalar(255,0,0,255), 2);
+        Imgproc.putText(mRgbaT, "fps: " + fps, new Point(30,60),FONT_HERSHEY_SIMPLEX, 1, new Scalar(255,0,0,255), 2);
         //mRgba.release();
-        return mRgba;
+        return mRgbaT;
     }
 
     int fps = 0;

@@ -1,7 +1,7 @@
 #include"pBox.h"
 
 void freepBox(struct pBox *pbox){
-	if(pbox->pdata==NULL)cout<<"pbox is NULL!"<<endl;
+	if(pbox == NULL || pbox->pdata==NULL)cout<<"pbox is NULL!"<<endl;
 	else 
 		free(pbox->pdata);
 	pbox->pdata = NULL;

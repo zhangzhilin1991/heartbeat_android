@@ -1,4 +1,7 @@
 #include "network.h"
+#include "openblas_0_3_8_dev/include/cblas.h"
+#include "include/pBox.h"
+
 void addbias(struct pBox *pbox, mydataFmt *pbias){
     if (pbox->pdata == NULL){
         cout << "Relu feature is NULL!!" << endl;
@@ -284,7 +287,6 @@ void fullconnect(const Weight *weight, const pBox *pbox, pBox *outpBox){
     //               row         no trans         A's row               A'col
     cblas_sgemv(CblasRowMajor, CblasNoTrans, weight->selfChannel, weight->lastChannel, 1, weight->pdata, weight->lastChannel, pbox->pdata, 1, 0, outpBox->pdata, 1);
 }
-
 
 
 void readData(string filename, long dataNumber[], mydataFmt *pTeam[]){

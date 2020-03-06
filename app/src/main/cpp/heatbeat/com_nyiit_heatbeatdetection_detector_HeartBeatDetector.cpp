@@ -24,9 +24,9 @@
 #define DEFAULT_MAX_SIGNAL_SIZE 5
 #define DEFAULT_DOWNSAMPLE 1 // x means only every xth frame is used
 
-#define HAAR_CLASSIFIER_PATH "algomodel/haar/haarcascade_frontalface_alt.xml"
-#define DNN_PROTO_PATH "algomodel/dnn/deploy.prototxt"
-#define DNN_MODEL_PATH "algomodel/dnn/res10_300x300_ssd_iter_140000.caffemodel"
+#define HAAR_CLASSIFIER_PATH "/sdcard/heartbeat/haar/haarcascade_frontalface_alt.xml"
+#define DNN_PROTO_PATH "/sdcard/heartbeat/dnn/deploy.prototxt"
+#define DNN_MODEL_PATH "/sdcard/heartbeat/dnn/res10_300x300_ssd_iter_140000.caffemodel"
 
 using namespace cv;
 using namespace std;
@@ -38,9 +38,9 @@ using namespace std;
 #define LOG_TAG "FaceDetection/DetectionBasedTracker"
 #define LOGD(...) ((void)__android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__))
 
-RPPG rppg;
-rPPGAlgorithm rPPGAlg;
-faceDetAlgorithm faceDetAlg;
+RPPG* rppg = nullptr;
+//rPPGAlgorithm rPPGAlg;
+//faceDetAlgorithm faceDetAlg;
 bool isInit = false;
 
 rPPGAlgorithm to_rppgAlgorithm(string s) {
@@ -79,14 +79,14 @@ faceDetAlgorithm  to_faceDetAlgorithm(string s) {
 
 bool initRPPG(int width, int height) {
     if (isInit == false) {
-        rPPGAlg = to_rppgAlgorithm(DEFAULT_RPPG_ALGORITHM);
-        faceDetAlg =  to_faceDetAlgorithm(DEFAULT_FACEDET_ALGORITHM);
+        rPPGAlgorithm rPPGAlg = to_rppgAlgorithm(DEFAULT_RPPG_ALGORITHM);
+        faceDetAlgorithm faceDetAlg =  to_faceDetAlgorithm(DEFAULT_FACEDET_ALGORITHM);
         double rescanFrequency = DEFAULT_RESCAN_FREQUENCY;
         double samplingFrequency = DEFAULT_SAMPLING_FREQUENCY;
         int  minSignalSize = DEFAULT_MIN_SIGNAL_SIZE;
         int maxSignalSize = DEFAULT_MAX_SIGNAL_SIZE;
         int downsample = DEFAULT_DOWNSAMPLE;
-        string LOG_PATH = "sdcard/heartbeat/Live_ffmpeg";
+        string LOG_PATH = "/sdcard/heartbeat/Live_ffmpeg";
 
         // Load video information
         const int WIDTH = width;
@@ -95,14 +95,15 @@ bool initRPPG(int width, int height) {
         const double TIME_BASE = 0.001;
 
         //rppg = cv::Ptr<RPPG>(new RPPG());
-        rppg = RPPG();
-        return rppg.load(rPPGAlg, faceDetAlg,
+        rppg = new RPPG();
+        rppg->load(rPPGAlg, faceDetAlg,
                           WIDTH, HEIGHT, TIME_BASE, downsample,
                           samplingFrequency, rescanFrequency,
                           minSignalSize, maxSignalSize,
                           LOG_PATH, HAAR_CLASSIFIER_PATH,
                           DNN_PROTO_PATH, DNN_MODEL_PATH,
                           false, false, 250);
+        return true;
     }
     return false;
 }
@@ -117,7 +118,7 @@ void process(Mat& imageRgba, Mat& imageGray) { //ref
         isInit = initRPPG(imageRgba.cols, imageRgba.rows);
     }
     // 计算当前是第几帧
-    rppg.countFrame();
+    rppg->countFrame();
 
     // 对图像做镜像翻转
     //flip(frameRGB, frameRGB, 1);
@@ -138,7 +139,7 @@ void process(Mat& imageRgba, Mat& imageGray) { //ref
 
     // 主要处理部分
     //if (i % downsample == 0) {
-        rppg.processFrame(imageRgba, imageGray, time, rppg.face_detector);
+        rppg->processFrame(imageRgba, imageGray, time, rppg->face_detector);
     //} else {
      //   cout << "SKIPPING FRAME TO DOWNSAMPLE!" << endl;
     //}
