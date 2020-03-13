@@ -48,12 +48,13 @@ public:
 	bool constantLoad();
 
     void processFrame(Mat &frameRGB, Mat &frameGray, int time);
-	void processFrame(Mat &frameRGB, Mat &frameGray, int time, mtcnn &mtcnn_find);
+	void processFrame(Mat &frameRGB, Mat &frameGray, double time, mtcnn &mtcnn_find);
 	void countFrame();
 
     void exit();
-	mtcnn face_detector = mtcnn(480, 640);
-    typedef vector<Point2f> Contour2f;
+	//mtcnn face_detector = mtcnn(480, 640);
+	mtcnn face_detector = mtcnn(640, 480);
+	typedef vector<Point2f> Contour2f;
     typedef nc::NdArray<double> Ndarrayd;
 
 private:
@@ -95,11 +96,11 @@ private:
     bool guiMode;
 
     // State variables
-    int64_t time;
+	double time;
     double fps;
     int high;
-    int64_t lastSamplingTime;
-    int64_t lastScanTime;
+    double lastSamplingTime;
+	double lastScanTime;
     int low;
     int64_t now;
     bool faceValid;

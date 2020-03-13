@@ -1,5 +1,8 @@
 package com.nyiit.heatbeatdetection;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -30,8 +33,8 @@ public class CameraPreviewActivity extends CameraActivity implements CameraBridg
     public static final String TAG = CameraPreviewActivity.class.getName();
 
     // Used to load the 'native-lib' library on application startup.
-    Mat mRgba;
-    Mat mRgbaT;
+    Mat mRgb;
+    Mat mRgbT;
     Mat mGray;
     Mat mGrayT;
     JavaCameraView mOpenCvCameraView;
@@ -68,10 +71,11 @@ public class CameraPreviewActivity extends CameraActivity implements CameraBridg
 
         mOpenCvCameraView = findViewById(R.id.hb_activity_surface_view);
         mOpenCvCameraView.setVisibility(CameraBridgeViewBase.VISIBLE);
-        mOpenCvCameraView.setMaxFrameSize(800, 600); //landscape
+        mOpenCvCameraView.setMaxFrameSize(480, 640); //landscape
         mOpenCvCameraView.setCvCameraViewListener(this);
         // Example of a call to a native method
         //TextView tv = findViewById(R.id.sample_text);
+        checkPermission();
     }
 
     @Override
@@ -107,15 +111,15 @@ public class CameraPreviewActivity extends CameraActivity implements CameraBridg
 
     @Override
     public void onCameraViewStarted(int width, int height) {
-        mRgba = new Mat(height, width, CvType.CV_8UC4);
-        mRgbaT = new Mat(height, width, CvType.CV_8UC4);
+        mRgb = new Mat(height, width, CvType.CV_8UC3);
+        mRgbT = new Mat(height, width, CvType.CV_8UC3);
         mGray = new Mat(height, width, CvType.CV_8UC1);
         mGrayT = new Mat();
     }
 
     @Override
     public void onCameraViewStopped() {
-        mRgba.release();
+        mRgb.release();
         mGray.release();
         mGrayT.release();
     }
@@ -123,13 +127,13 @@ public class CameraPreviewActivity extends CameraActivity implements CameraBridg
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
 
-        mRgba = inputFrame.rgba();
-        if (mRgbaT != null) {
-            mRgbaT.release();
+        mRgb = inputFrame.rgba();
+        if (mRgbT != null) {
+            mRgbT.release();
         }
-        mRgbaT = mRgba.t();
-        Core.flip(mRgbaT, mRgbaT, 1);
-        Imgproc.resize(mRgbaT, mRgbaT, mRgba.size());
+        mRgbT = mRgb.t();
+        Core.flip(mRgbT, mRgbT, 1);
+        Imgproc.resize(mRgbT, mRgbT, mRgb.size());
 
         mGray = inputFrame.gray();
         if (mGrayT != null) {
@@ -139,13 +143,12 @@ public class CameraPreviewActivity extends CameraActivity implements CameraBridg
         Core.flip(mGrayT, mGrayT, 1);
         Imgproc.resize(mGrayT, mGrayT, mGray.size());
 
-
-        HeartBeatDetector.detectHeartBeat(mRgbaT, mGrayT);
+        HeartBeatDetector.detectHeartBeat(mRgbT, mGrayT);
 
         int fps = fps();
-        Imgproc.putText(mRgbaT, "fps: " + fps, new Point(30,60),FONT_HERSHEY_SIMPLEX, 1, new Scalar(255,0,0,255), 2);
+        Imgproc.putText(mRgbT, "fps: " + fps, new Point(30,60),FONT_HERSHEY_SIMPLEX, 1, new Scalar(255,0,0,255), 2);
         //mRgba.release();
-        return mRgbaT;
+        return mRgbT;
     }
 
     int fps = 0;
@@ -164,5 +167,29 @@ public class CameraPreviewActivity extends CameraActivity implements CameraBridg
         }
         return fps;
 
+    }
+
+    private int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 0;
+
+    void checkPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
+                    != PackageManager.PERMISSION_GRANTED) {
+
+                // Should we show an explanation?
+                if (shouldShowRequestPermissionRationale(
+                        Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                    // Explain to the user why we need to read the contacts
+                }
+
+                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                        MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
+
+                // MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE is an
+                // app-defined int constant that should be quite unique
+
+                return;
+            }
+        }
     }
 }
